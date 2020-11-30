@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { Evento } from '../_models/Evento';
 import { EventoService } from '../_services/evento.service';
+import { ToastrService } from 'ngx-toastr';
 // import { defineLocale, BsLocaleService, ptBrLocale } from 'ngx-bootstrap';
 // defineLocale('pt-br', ptBrLocale);
 
@@ -21,6 +22,7 @@ export class EventosComponent implements OnInit {
   mostrarImagem = false;
   registerForm: FormGroup;
   bodyDeletarEvento = '';
+  dataEvento: string;
 
   _filtroLista = '';
 
@@ -28,6 +30,7 @@ export class EventosComponent implements OnInit {
     private eventoService: EventoService
     , private modalService: BsModalService
     , private fb: FormBuilder
+    , private toastr: ToastrService
     ) { }
 
   get filtroLista(): string{
@@ -78,11 +81,13 @@ export class EventosComponent implements OnInit {
       this.evento = Object.assign({}, this.registerForm.value);
       let is_insert = (this.evento.id == null ? true : false);
       if (is_insert){
+        delete this.evento.id;
         this.eventoService.postEvento(this.evento).subscribe(
           (novoEvento: Evento) => {
             console.log(novoEvento);
             template.hide();
             this.getEventos();
+            this.toastr.success('Inserido com Sucesso');
           },
           error => {
             console.log(error);
@@ -94,6 +99,8 @@ export class EventosComponent implements OnInit {
             console.log(retorno);
             template.hide();
             this.getEventos();
+            this.toastr.success('Editado com Sucesso');
+
           },
           error => {
             console.log(error);
@@ -147,8 +154,11 @@ export class EventosComponent implements OnInit {
       () => {
         template.hide();
         this.getEventos();
+        this.toastr.success('Deletado com Sucesso');
       }, error => {
+        this.toastr.error('erro ao tentar deletar');
         console.log(error);
+
       }
     )
   }
